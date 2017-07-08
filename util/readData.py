@@ -56,7 +56,7 @@ def getSuppliersData():
     for row in range(3, sheet.max_row):
         hasNullData = False
         sCode = getSupplierCode(row)
-        sDataList = []
+        sDataList = [row]
         for column in "EFGHIJK":
             cellName = "{}{}".format(column, row)
             cellValue = sheet[cellName].value
@@ -83,7 +83,7 @@ def getSuppliersDataFromBusinessArea(businessArea):
             continue
         hasNullData = False
         sCode = getSupplierCode(row)
-        sDataList = []
+        sDataList = [row]
         for column in suppliers_data_columns:
             cellName = "{}{}".format(column, row)
             cellValue = sheet[cellName].value
