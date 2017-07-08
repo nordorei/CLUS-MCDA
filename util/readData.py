@@ -1,8 +1,40 @@
 import openpyxl as xlsx
 import numpy as np
+import json
+import os
+from .path import *
 
-workbook = xlsx.load_workbook(filename='../data/feed-data.xlsx')
+workbook = xlsx.load_workbook(filename=FEED_DATA_PATH)
 sheet = workbook.get_sheet_by_name(name='Big Data Structured Matrix')
+business_areas = open(BUSINESS_AREAS_PATH, 'r')
+suppliers_data_columns = "EFGHIJK"
+
+def getCell(column, row):
+    """
+    """
+    cellName = '{}{}'.format(column, row)
+    cellValue = sheet[cellName].value
+    return cellValue
+
+
+def getSupplierCode(row):
+    """
+    """
+    return getCell('B', row)
+
+
+def getBusinessArea(row):
+    """
+    """
+    return getCell('D', row)
+
+
+def getBusinessAreasList():
+    """
+    """
+    
+    return json.loads(business_areas.read())
+
 
 def getColumn(column):
     """
@@ -12,10 +44,10 @@ def getColumn(column):
     """
     result = []
     for row in range(3, sheet.max_row):
-        cellName = "{}{}".format(column, row)
-        result.append(sheet[cellName].value)
+        result.append(getCell(column, row))
 
     return result
+
 
 def getSuppliersData():
     """
@@ -23,9 +55,36 @@ def getSuppliersData():
     suppliers = {}
     for row in range(3, sheet.max_row):
         hasNullData = False
-        sCode = sheet['B{}'.format(row)].value
+        sCode = getSupplierCode(row)
         sDataList = []
         for column in "EFGHIJK":
+            cellName = "{}{}".format(column, row)
+            cellValue = sheet[cellName].value
+            if cellValue is None:
+                hasNullData = True
+                break
+            sDataList.append(cellValue)
+
+        if hasNullData:
+            continue
+
+        sDataArray = np.array(sDataList)
+        suppliers[sCode] = sDataArray
+
+    return suppliers
+
+
+def getSuppliersDataFromBusinessArea(businessArea):
+    """
+    """
+    suppliers = {}
+    for row in range(3, sheet.max_row):
+        if not getBusinessArea(row) == businessArea:
+            continue
+        hasNullData = False
+        sCode = getSupplierCode(row)
+        sDataList = []
+        for column in suppliers_data_columns:
             cellName = "{}{}".format(column, row)
             cellValue = sheet[cellName].value
             if cellValue is None:

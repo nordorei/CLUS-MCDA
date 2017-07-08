@@ -1,4 +1,11 @@
 from sklearn.cluster import KMeans
+import util.readData as dataProvider
 
-k = 4 #default number of clusters
+businessAreas = dataProvider.getBusinessAreasList()
+
+suppliersData = {}
+for area in businessAreas.values():
+    suppliersData[area] = dataProvider.getSuppliersDataFromBusinessArea(area)
+
+k = 5 #default number of clusters
 kMeans = KMeans(n_clusters=k)
