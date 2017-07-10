@@ -56,7 +56,7 @@ def getSuppliersData():
     for row in range(3, sheet.max_row):
         hasNullData = False
         sCode = getSupplierCode(row)
-        sDataList = [row]
+        sDataList = [sCode]
         for column in "EFGHIJK":
             cellName = "{}{}".format(column, row)
             cellValue = sheet[cellName].value
@@ -69,7 +69,7 @@ def getSuppliersData():
             continue
 
         sDataArray = np.array(sDataList)
-        suppliers[sCode] = sDataArray
+        suppliers[row] = sDataArray
 
     return suppliers
 
