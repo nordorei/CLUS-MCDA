@@ -32,7 +32,6 @@ def getBusinessArea(row):
 def getBusinessAreasList():
     """
     """
-    
     return json.loads(business_areas.read())
 
 
@@ -49,32 +48,7 @@ def getColumn(column):
     return result
 
 
-def getSuppliersData():
-    """
-    """
-    suppliers = {}
-    for row in range(3, sheet.max_row):
-        hasNullData = False
-        sCode = getSupplierCode(row)
-        sDataList = [sCode]
-        for column in "EFGHIJK":
-            cellName = "{}{}".format(column, row)
-            cellValue = sheet[cellName].value
-            if cellValue is None:
-                hasNullData = True
-                break
-            sDataList.append(cellValue)
-
-        if hasNullData:
-            continue
-
-        sDataArray = np.array(sDataList)
-        suppliers[row] = sDataArray
-
-    return suppliers
-
-
-def getSuppliersDataFromBusinessArea(businessArea):
+def getSuppliersData(businessArea):
     """
     """
     suppliers = {}
@@ -82,8 +56,7 @@ def getSuppliersDataFromBusinessArea(businessArea):
         if not getBusinessArea(row) == businessArea:
             continue
         hasNullData = False
-        sCode = getSupplierCode(row)
-        sDataList = [row]
+        sDataList = []
         for column in suppliers_data_columns:
             cellName = "{}{}".format(column, row)
             cellValue = sheet[cellName].value
@@ -96,6 +69,6 @@ def getSuppliersDataFromBusinessArea(businessArea):
             continue
 
         sDataArray = np.array(sDataList)
-        suppliers[sCode] = sDataArray
+        suppliers[row] = sDataArray
 
     return suppliers
