@@ -65,7 +65,8 @@ def runKMeansForAllAreas(suppliersData, k, kMeans, mustBeInClustering):
 
         if len(data) <= 5: # no clustering needed
             mustBeInClustering[area] = False
-            clusters[area] = np.array(data)
+            print(area)
+            clusters[area] = {'FinalCandidates': np.array(data)}
             continue
 
         data = np.array(data)
@@ -103,16 +104,19 @@ def runKMeansForAllAreas(suppliersData, k, kMeans, mustBeInClustering):
         pyplot.show()
         clusters[area] = clusterData
 
-    print(clusters)
     return clusters, mustBeInClustering
 
-def runCLUSMCDA(clusters=5):
+def runCLUSMCDA(k_clusters=5):
     """
     """
-    suppliersData, k, kMeans, mustBeInClustering = __initClustering(clusters)
+    suppliersData, k, kMeans, mustBeInClustering = __initClustering(k_clusters)
 
-    while __isClusteringNeeded(mustBeInClustering):
-        clusters, mustBeInClustering = runKMeansForAllAreas(suppliersData, k, kMeans, mustBeInClustering)
+    #while __isClusteringNeeded(mustBeInClustering):
+    clusters, mustBeInClustering = runKMeansForAllAreas(suppliersData, k, kMeans, mustBeInClustering)
+    for area in businessAreas.values():
+        areaData = []
+        for cluster in clusters[area]:
+            print(area, cluster, clusters[area][cluster])
 
 
 if __name__ == '__main__':

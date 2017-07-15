@@ -48,6 +48,16 @@ def getColumn(column):
     return result
 
 
+def getRow(row):
+    """
+    """
+    data = []
+    for column in suppliers_data_columns:
+        data.append(getCell(column, row))
+
+    return np.array(data)
+
+
 def getSuppliersData(businessArea):
     """
     """
