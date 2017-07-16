@@ -120,6 +120,7 @@ def runCLUSMCDA(k_clusters=5):
             # print(area, cluster, areaClusterRows)
 
             X = np.array([dataProvider.getRow(row) for row in areaClusterRows])
+            w = [0.207317073, 0.12195122, 0.170731707, 0.12195122, 0.097560976, 0.146341463, 0.134146341]
 
 
 if __name__ == '__main__':
