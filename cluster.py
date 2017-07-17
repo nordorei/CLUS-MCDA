@@ -8,6 +8,8 @@ import math
 businessAreas = dataProvider.getBusinessAreasList()
 k = 5 # default number of clusters
 sample_case_study = 'Contractor'
+min_columns = [0 , 5 , 6]
+max_columns = [1, 2, 3, 4]
 suppliersData = {}
 kMeans = KMeans(n_clusters=k)
 
@@ -122,8 +124,9 @@ def runCLUSMCDA(k_clusters=5):
 
             x = np.array([dataProvider.getRow(row) for row in areaClusterRows])
             w = [0.207317073, 0.12195122, 0.170731707, 0.12195122, 0.097560976, 0.146341463, 0.134146341]
+            n = len(w) # number of columns
 
-            # normalizing x
+            # normalizing X
             X = []
             for i in range(len(x)):
                 row = []
@@ -137,8 +140,54 @@ def runCLUSMCDA(k_clusters=5):
                 X.append(np.array(row))
                     
             X = np.array(X)
-            
-                
+
+            # calculating Y
+            Y = []
+            for i in range(len(X)):
+                Yjg = 0
+                for g in max_columns:
+                    Yjg += w[g] * X[i][g]
+
+                Ygn = 0
+                for ng in min_columns:
+                    Ygn += w[ng] * X[i][ng]
+
+                Yi = Yjg - Ygn
+                Y.append(Yi)
+
+            Y = np.array(Y)
+
+            # calculating R
+            R = []
+            for j in range(n):
+                rj = X[0][j]
+                if j in min_columns:
+                    for i in range(len(X)):
+                        if rj > X[i][j]:
+                            rj = X[i][j]
+
+                else:
+                    for i in range(len(X)):
+                        if rj < X[i][j]:
+                            rj = X[i][j]
+
+                R.append(rj)
+
+            R = np.array(R)
+
+            # calculating Z
+            Z = []
+            for i in range(len(X)):
+                zi = X[i][0]
+                for j in range(n):
+                    exp = abs(w[j] * R[j] - w[j] * X[i][j])
+                    if zi < exp:
+                        zi = exp
+
+                Z.append(zi)
+
+            Z = np.array(Z)
+            print(Z)
             
 
 
