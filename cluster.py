@@ -203,7 +203,6 @@ def runCLUSMCDA(k_clusters=5):
                 U.append(ui)
 
             U = np.array(U)
-            print(U)
             
 
 
