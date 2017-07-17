@@ -14,6 +14,8 @@ def getCell(column, row):
     """
     cellName = '{}{}'.format(column, row)
     cellValue = sheet[cellName].value
+    if cellValue == 'c':
+        return 60
     return cellValue
 
 

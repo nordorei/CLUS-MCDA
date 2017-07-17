@@ -3,6 +3,7 @@ from matplotlib import pyplot
 from scipy.spatial import ConvexHull
 import util.readData as dataProvider
 import numpy as np
+import math
 
 businessAreas = dataProvider.getBusinessAreasList()
 k = 5 # default number of clusters
@@ -119,8 +120,26 @@ def runCLUSMCDA(k_clusters=5):
             areaClusterRows = clusters[area][cluster][:,0]
             # print(area, cluster, areaClusterRows)
 
-            X = np.array([dataProvider.getRow(row) for row in areaClusterRows])
+            x = np.array([dataProvider.getRow(row) for row in areaClusterRows])
             w = [0.207317073, 0.12195122, 0.170731707, 0.12195122, 0.097560976, 0.146341463, 0.134146341]
+
+            # normalizing x
+            X = []
+            for i in range(len(x)):
+                row = []
+                for j in range(len(x[i])):
+                    RoSoS = 0 # Root of Sum of Squares
+                    for k in range(len(x)):
+                        RoSoS += (x[k][j]) ** 2
+                    RoSoS = math.sqrt(RoSoS)
+
+                    row.append(x[i][j] / RoSoS)
+                X.append(np.array(row))
+                    
+            X = np.array(X)
+            
+                
+            
 
 
 if __name__ == '__main__':
