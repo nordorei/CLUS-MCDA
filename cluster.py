@@ -187,7 +187,23 @@ def runCLUSMCDA(k_clusters=5):
                 Z.append(zi)
 
             Z = np.array(Z)
-            print(Z)
+            
+            # calculating U
+            U = []
+            for i in range(len(X)):
+                up = 1
+                for g in max_columns:
+                    up *= X[i][j] ** w[j]
+
+                bot = 1
+                for ng in min_columns:
+                    bot *= X[i][j] ** w[j]
+
+                ui = up / bot
+                U.append(ui)
+
+            U = np.array(U)
+            print(U)
             
 
 
