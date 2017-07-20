@@ -120,7 +120,6 @@ def runCLUSMCDA(k_clusters=5):
         areaData = []
         for cluster in clusters[area]:
             areaClusterRows = clusters[area][cluster][:,0]
-            # print(area, cluster, areaClusterRows)
 
             x = np.array([dataProvider.getRow(row) for row in areaClusterRows])
             w = [0.207317073, 0.12195122, 0.170731707, 0.12195122, 0.097560976, 0.146341463, 0.134146341]
@@ -203,6 +202,20 @@ def runCLUSMCDA(k_clusters=5):
                 U.append(ui)
 
             U = np.array(U)
+            
+            # gettting means
+            y = 0
+            z = 0
+            u = 0
+            no = len(Z)
+            for i in range(no):
+                y += Y[i]
+                z += Z[i]
+                u += U[i]
+            y /= no
+            z /= no
+            u /= no
+
             
 
 
