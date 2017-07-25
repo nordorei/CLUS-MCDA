@@ -117,7 +117,7 @@ def runCLUSMCDA(k_clusters=5):
     #while __isClusteringNeeded(mustBeInClustering):
     clusters, mustBeInClustering = runKMeansForAllAreas(suppliersData, k, kMeans, mustBeInClustering)
     for area in businessAreas.values():
-        areaData = []
+        areaClusterData = []
         for cluster in clusters[area]:
             areaClusterRows = clusters[area][cluster][:,0]
 
@@ -203,18 +203,32 @@ def runCLUSMCDA(k_clusters=5):
 
             U = np.array(U)
             
-            # gettting means
-            y = 0
-            z = 0
-            u = 0
-            no = len(Z)
-            for i in range(no):
-                y += Y[i]
-                z += Z[i]
-                u += U[i]
-            y /= no
-            z /= no
-            u /= no
+            if cluster == 'FinalCandidates':
+                candidates = len(U)
+                for i in range(candidates):
+                    areaClusterData.append(np.array(['Candidate{}'.format(i + 1), Y[i], Z[i], U[i]]))
+
+            else:
+                # gettting means
+                y = 0
+                z = 0
+                u = 0
+                no = len(Z)
+                for i in range(no):
+                    y += Y[i]
+                    z += Z[i]
+                    u += U[i]
+                y /= no
+                z /= no
+                u /= no
+
+                areaClusterData.append(np.array([cluster, y, z, u]))
+
+        areaClusterData = np.array(areaClusterData)
+
+
+        print(area)
+        print(areaClusterData)
 
             
 
