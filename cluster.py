@@ -226,11 +226,14 @@ def runCLUSMCDA(k_clusters=5):
 
         areaClusterData = np.array(areaClusterData)
 
+        # determining rankings for each column
         yRanks = getRanks(areaClusterData[:,1])
         zRanks = getRanks(areaClusterData[:,2], descending=True)
         uRanks = getRanks(areaClusterData[:,3])
 
-        ranks = np.array([[yRanks[i], zRanks[i], uRanks[i]] for i in range(len(yRanks))])
+        fRanks = getFinalRanks(yRanks, zRanks, uRanks)
+        # appending ranks to data rows
+        ranks = np.array([[yRanks[i], zRanks[i], uRanks[i], fRanks[i]] for i in range(len(yRanks))])
         
         areaClusterDataRanks = []
         for i in range(len(ranks)):
@@ -240,7 +243,7 @@ def runCLUSMCDA(k_clusters=5):
 
         areaClusterDataRanks = np.array(areaClusterDataRanks)
 
-        
+
         print(area)
         print(areaClusterDataRanks)
 
@@ -257,8 +260,21 @@ def getRanks(dataColumn, descending=False):
 
     return ranks
 
-    
 
+def getFinalRanks(yRanks, zRanks, uRanks):
+    """
+    """
+    rankTuples = []
+    data = []
+    for i in range(len(yRanks)):
+        row = [yRanks[i], zRanks[i], uRanks[i]]
+        row.sort()
+        rankTuples.append(row)
+        data.append(row)
+
+    rankTuples.sort()
+    fRanks = [rankTuples.index(row) + 1 for row in data]
+    return fRanks
 
 if __name__ == '__main__':
     runCLUSMCDA()
