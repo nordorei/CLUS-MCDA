@@ -226,11 +226,28 @@ def runCLUSMCDA(k_clusters=5):
 
         areaClusterData = np.array(areaClusterData)
 
+        yRanks = getRanks(areaClusterData[:,1])
+        zRanks = getRanks(areaClusterData[:,2])
+        uRanks = getRanks(areaClusterData[:,3])
 
         print(area)
         print(areaClusterData)
+        print(yRanks, zRanks, uRanks)
 
             
+
+def getRanks(dataColumn):
+    """
+    """
+    items = [item for item in dataColumn]
+    itemsSorted = [item for item in dataColumn]
+    itemsSorted.sort()
+
+    ranks = [itemsSorted.index(item) + 1 for item in items]
+
+    return ranks
+
+    
 
 
 if __name__ == '__main__':
