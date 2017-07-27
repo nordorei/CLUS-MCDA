@@ -116,6 +116,7 @@ def runCLUSMCDA(k_clusters=5):
 
     #while __isClusteringNeeded(mustBeInClustering):
     clusters, mustBeInClustering = runKMeansForAllAreas(suppliersData, k, kMeans, mustBeInClustering)
+    rowsToBeKept = []
     for area in businessAreas.values():
         areaClusterData = []
         for cluster in clusters[area]:
@@ -245,16 +246,24 @@ def runCLUSMCDA(k_clusters=5):
 
         # finding top 3 clusters/candidates
         topClusters = [row[0] for row in areaClusterDataRanks if int(row[-1]) <= 3]
-        topClusters = {} 
+        topClusters = {}
+        lowClusters = []
         for row in areaClusterDataRanks:
             rank = int(row[-1])
             if rank <= 3:
                 topClusters[rank] = row[0]
+            else:
+                lowClusters.append(row[0])
 
-        print(area)
-        print(areaClusterDataRanks)
-        print(topClusters, '\n')
+        # removing low clusters from data set
+        for cluster in lowClusters:
+            clusters[area].pop(cluster, None)
 
+        for cluster in clusters[area]:
+            rowsToBeKept.extend(clusters[area][cluster][:,0].astype(int).tolist())
+        
+    rowsToBeKept.sort()
+    print(rowsToBeKept)
             
 
 def getRanks(dataColumn, descending=False):
