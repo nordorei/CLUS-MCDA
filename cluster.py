@@ -72,6 +72,7 @@ def runKMeansForAllAreas(suppliersData, k, kMeans, mustBeInClustering):
             continue
 
         data = np.array(data)
+        kMeans = KMeans(n_clusters=k)
         kMeans.fit(data)
         labels = kMeans.labels_
         centroids = kMeans.cluster_centers_
@@ -84,13 +85,13 @@ def runKMeansForAllAreas(suppliersData, k, kMeans, mustBeInClustering):
             ds = data[np.where(labels==i)]
             clusterData[clusterLabel] = ds[:, :2]
             # plot the data observations
-            plot, = pyplot.plot(ds[:,0],ds[:,1],'o', label=clusterLabel)
-            plot_handles.append(plot)
-            # plot the centroids
-            lines = pyplot.plot(centroids[i,0],centroids[i,1],'kx')
+            # plot, = pyplot.plot(ds[:,0],ds[:,1],'o', label=clusterLabel)
+            # plot_handles.append(plot)
+            # # plot the centroids
+            # lines = pyplot.plot(centroids[i,0],centroids[i,1],'kx')
             # make the centroid x's bigger
-            pyplot.setp(lines,ms=15.0)
-            pyplot.setp(lines,mew=2.0)
+            # pyplot.setp(lines,ms=15.0)
+            # pyplot.setp(lines,mew=2.0)
 
             # points = np.array([np.array([row[0], row[1]]) for row in ds])
             # if points.shape[0] < 3:
@@ -114,157 +115,175 @@ def runCLUSMCDA(k_clusters=5):
     """
     suppliersData, k, kMeans, mustBeInClustering = __initClustering(k_clusters)
 
-    #while __isClusteringNeeded(mustBeInClustering):
-    clusters, mustBeInClustering = runKMeansForAllAreas(suppliersData, k, kMeans, mustBeInClustering)
-    rowsToBeKept = []
-    for area in businessAreas.values():
-        areaClusterData = []
-        for cluster in clusters[area]:
-            areaClusterRows = clusters[area][cluster][:,0]
+    cycle = 0
+    while __isClusteringNeeded(mustBeInClustering):
+        cycle += 1
+        print(cycle, mustBeInClustering.values(), '\n')
+        clusters, mustBeInClustering = runKMeansForAllAreas(suppliersData, k, kMeans, mustBeInClustering)
+        # if cycle > 1:
+        #     print(clusters)
+        rowsToBeRemoved = []
+        for area in businessAreas.values():
+            if not mustBeInClustering[area]:
+                continue
 
-            x = np.array([dataProvider.getRow(row) for row in areaClusterRows])
-            w = [0.207317073, 0.12195122, 0.170731707, 0.12195122, 0.097560976, 0.146341463, 0.134146341]
-            n = len(w) # number of columns
+            areaClusterData = []
+            for cluster in clusters[area]:
+                areaClusterRows = clusters[area][cluster][:,0]
 
-            # normalizing X
-            X = []
-            for i in range(len(x)):
-                row = []
-                for j in range(len(x[i])):
-                    RoSoS = 0 # Root of Sum of Squares
-                    for k in range(len(x)):
-                        RoSoS += (x[k][j]) ** 2
-                    RoSoS = math.sqrt(RoSoS)
+                x = np.array([dataProvider.getRow(row) for row in areaClusterRows])
+                w = [0.207317073, 0.12195122, 0.170731707, 0.12195122, 0.097560976, 0.146341463, 0.134146341]
+                n = len(w) # number of columns
 
-                    row.append(x[i][j] / RoSoS)
-                X.append(np.array(row))
-                    
-            X = np.array(X)
+                # normalizing X
+                X = []
+                for i in range(len(x)):
+                    row = []
+                    for j in range(len(x[i])):
+                        RoSoS = 0.0 # Root of Sum of Squares
+                        for k in range(len(x)):
+                            RoSoS += float(x[k][j]) ** 2
+                        RoSoS = float(math.sqrt(RoSoS))
+                        if RoSoS == 0.0:
+                            RoSoS = 0.00000001 # a tiny number
+                        row.append(float(x[i][j]) / RoSoS)
+                    X.append(np.array(row))
+                        
+                X = np.array(X)
 
-            # calculating Y
-            Y = []
-            for i in range(len(X)):
-                Yjg = 0
-                for g in max_columns:
-                    Yjg += w[g] * X[i][g]
+                # calculating Y
+                Y = []
+                for i in range(len(X)):
+                    Yjg = 0
+                    for g in max_columns:
+                        Yjg += w[g] * X[i][g]
 
-                Ygn = 0
-                for ng in min_columns:
-                    Ygn += w[ng] * X[i][ng]
+                    Ygn = 0
+                    for ng in min_columns:
+                        Ygn += w[ng] * X[i][ng]
 
-                Yi = Yjg - Ygn
-                Y.append(Yi)
+                    Yi = Yjg - Ygn
+                    Y.append(Yi)
 
-            Y = np.array(Y)
+                Y = np.array(Y)
 
-            # calculating R
-            R = []
-            for j in range(n):
-                rj = X[0][j]
-                if j in min_columns:
-                    for i in range(len(X)):
-                        if rj > X[i][j]:
-                            rj = X[i][j]
+                # calculating R
+                R = []
+                for j in range(n):
+                    rj = X[0][j]
+                    if j in min_columns:
+                        for i in range(len(X)):
+                            if rj > X[i][j]:
+                                rj = X[i][j]
+
+                    else:
+                        for i in range(len(X)):
+                            if rj < X[i][j]:
+                                rj = X[i][j]
+
+                    R.append(rj)
+
+                R = np.array(R)
+
+                # calculating Z
+                Z = []
+                for i in range(len(X)):
+                    zi = X[i][0]
+                    for j in range(n):
+                        exp = abs(w[j] * R[j] - w[j] * X[i][j])
+                        if zi < exp:
+                            zi = exp
+
+                    Z.append(zi)
+
+                Z = np.array(Z)
+                
+                # calculating U
+                U = []
+                for i in range(len(X)):
+                    up = 1
+                    for g in max_columns:
+                        up *= X[i][j] ** w[j]
+
+                    bot = 1
+                    for ng in min_columns:
+                        bot *= X[i][j] ** w[j]
+
+                    if bot == 0.0:
+                        bot == 0.0000001 # a tiny number
+                    ui = up / bot
+                    U.append(ui)
+
+                U = np.array(U)
+                
+                if cluster == 'FinalCandidates':
+                    candidates = len(U)
+                    for i in range(candidates):
+                        areaClusterData.append(np.array(['Candidate{}'.format(i + 1), Y[i], Z[i], U[i]]))
 
                 else:
-                    for i in range(len(X)):
-                        if rj < X[i][j]:
-                            rj = X[i][j]
+                    # gettting means
+                    y = 0
+                    z = 0
+                    u = 0
+                    no = len(Z)
+                    for i in range(no):
+                        y += Y[i]
+                        z += Z[i]
+                        u += U[i]
+                    y /= no
+                    z /= no
+                    u /= no
 
-                R.append(rj)
+                    areaClusterData.append(np.array([cluster, float(y), float(z), float(u)]))
 
-            R = np.array(R)
+            areaClusterData = np.array(areaClusterData)
 
-            # calculating Z
-            Z = []
-            for i in range(len(X)):
-                zi = X[i][0]
-                for j in range(n):
-                    exp = abs(w[j] * R[j] - w[j] * X[i][j])
-                    if zi < exp:
-                        zi = exp
+            # determining rankings for each column
+            yRanks = getRanks(areaClusterData[:,1])
+            zRanks = getRanks(areaClusterData[:,2], descending=True)
+            uRanks = getRanks(areaClusterData[:,3])
 
-                Z.append(zi)
-
-            Z = np.array(Z)
+            fRanks = getFinalRanks(yRanks, zRanks, uRanks)
+            # appending ranks to data rows
+            ranks = np.array([[yRanks[i], zRanks[i], uRanks[i], fRanks[i]] for i in range(len(yRanks))])
             
-            # calculating U
-            U = []
-            for i in range(len(X)):
-                up = 1
-                for g in max_columns:
-                    up *= X[i][j] ** w[j]
+            areaClusterDataRanks = []
+            for i in range(len(ranks)):
+                oldRow = areaClusterData[i]
+                newRow = np.insert(oldRow, len(oldRow), ranks[i])
+                areaClusterDataRanks.append(newRow)
 
-                bot = 1
-                for ng in min_columns:
-                    bot *= X[i][j] ** w[j]
+            areaClusterDataRanks = np.array(areaClusterDataRanks)
 
-                ui = up / bot
-                U.append(ui)
+            # finding top 3 clusters/candidates
+            topClusters = [row[0] for row in areaClusterDataRanks if int(row[-1]) <= 3]
+            topClusters = {}
+            lowClusters = []
+            for row in areaClusterDataRanks:
+                rank = int(row[-1])
+                if rank <= 3:
+                    topClusters[rank] = row[0]
+                else:
+                    lowClusters.append(row[0])
 
-            U = np.array(U)
-            
-            if cluster == 'FinalCandidates':
-                candidates = len(U)
-                for i in range(candidates):
-                    areaClusterData.append(np.array(['Candidate{}'.format(i + 1), Y[i], Z[i], U[i]]))
+            # removing low clusters from data set
+            for cluster in lowClusters:
+                rowsToBeRemoved.extend(clusters[area][cluster][:,0].astype(int).tolist())
 
-            else:
-                # gettting means
-                y = 0
-                z = 0
-                u = 0
-                no = len(Z)
-                for i in range(no):
-                    y += Y[i]
-                    z += Z[i]
-                    u += U[i]
-                y /= no
-                z /= no
-                u /= no
-
-                areaClusterData.append(np.array([cluster, float(y), float(z), float(u)]))
-
-        areaClusterData = np.array(areaClusterData)
-
-        # determining rankings for each column
-        yRanks = getRanks(areaClusterData[:,1])
-        zRanks = getRanks(areaClusterData[:,2], descending=True)
-        uRanks = getRanks(areaClusterData[:,3])
-
-        fRanks = getFinalRanks(yRanks, zRanks, uRanks)
-        # appending ranks to data rows
-        ranks = np.array([[yRanks[i], zRanks[i], uRanks[i], fRanks[i]] for i in range(len(yRanks))])
-        
-        areaClusterDataRanks = []
-        for i in range(len(ranks)):
-            oldRow = areaClusterData[i]
-            newRow = np.insert(oldRow, len(oldRow), ranks[i])
-            areaClusterDataRanks.append(newRow)
-
-        areaClusterDataRanks = np.array(areaClusterDataRanks)
-
-        # finding top 3 clusters/candidates
-        topClusters = [row[0] for row in areaClusterDataRanks if int(row[-1]) <= 3]
-        topClusters = {}
-        lowClusters = []
-        for row in areaClusterDataRanks:
-            rank = int(row[-1])
-            if rank <= 3:
-                topClusters[rank] = row[0]
-            else:
-                lowClusters.append(row[0])
-
-        # removing low clusters from data set
-        for cluster in lowClusters:
-            clusters[area].pop(cluster, None)
-
-        for cluster in clusters[area]:
-            rowsToBeKept.extend(clusters[area][cluster][:,0].astype(int).tolist())
-        
-    rowsToBeKept.sort()
-    print(rowsToBeKept)
-            
+        rowsToBeRemoved.sort()
+        dataLength = 0
+        for area in suppliersData:
+            dataLength += len(suppliersData[area])
+        print('old length:', dataLength)
+        print('to be removed', len(rowsToBeRemoved))
+        for area in suppliersData:
+            for uselessRow in rowsToBeRemoved:
+                suppliersData[area].pop(uselessRow, None)
+        dataLength = 0
+        for area in suppliersData:
+            dataLength += len(suppliersData[area])
+        print('new length:', dataLength, '\n\n')
 
 def getRanks(dataColumn, descending=False):
     """
