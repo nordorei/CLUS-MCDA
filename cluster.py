@@ -243,9 +243,17 @@ def runCLUSMCDA(k_clusters=5):
 
         areaClusterDataRanks = np.array(areaClusterDataRanks)
 
+        # finding top 3 clusters/candidates
+        topClusters = [row[0] for row in areaClusterDataRanks if int(row[-1]) <= 3]
+        topClusters = {} 
+        for row in areaClusterDataRanks:
+            rank = int(row[-1])
+            if rank <= 3:
+                topClusters[rank] = row[0]
 
         print(area)
         print(areaClusterDataRanks)
+        print(topClusters, '\n')
 
             
 
