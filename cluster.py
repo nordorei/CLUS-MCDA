@@ -91,7 +91,7 @@ def runKMeansForAllAreas(suppliersData, k, mustBeInClustering):
             # plot the data observations
             # plot, = pyplot.plot(ds[:,0],ds[:,1],'o', label=clusterLabel)
             # plot_handles.append(plot)
-            # # plot the centroids
+            # plot the centroids
             # lines = pyplot.plot(centroids[i,0],centroids[i,1],'kx')
             # make the centroid x's bigger
             # pyplot.setp(lines,ms=15.0)
@@ -213,26 +213,20 @@ def runCLUSMCDA(k_clusters=5):
 
                 U = np.array(U)
                 
-                if cluster == 'FinalCandidates':
-                    candidates = len(U)
-                    for i in range(candidates):
-                        areaClusterData.append(np.array(['Candidate{}'.format(i + 1), Y[i], Z[i], U[i]]))
+                # gettting means
+                y = 0
+                z = 0
+                u = 0
+                no = len(Z)
+                for i in range(no):
+                    y += Y[i]
+                    z += Z[i]
+                    u += U[i]
+                y /= no
+                z /= no
+                u /= no
 
-                else:
-                    # gettting means
-                    y = 0
-                    z = 0
-                    u = 0
-                    no = len(Z)
-                    for i in range(no):
-                        y += Y[i]
-                        z += Z[i]
-                        u += U[i]
-                    y /= no
-                    z /= no
-                    u /= no
-
-                    areaClusterData.append(np.array([cluster, float(y), float(z), float(u)]))
+                areaClusterData.append(np.array([cluster, float(y), float(z), float(u)]))
 
             areaClusterData = np.array(areaClusterData)
 
