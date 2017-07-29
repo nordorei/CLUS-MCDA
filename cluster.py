@@ -119,7 +119,7 @@ def runCLUSMCDA(k_clusters=5):
     while __isClusteringNeeded(mustBeInClustering):
         cycle += 1
         print(cycle, mustBeInClustering.values(), '\n')
-        clusters, mustBeInClustering = runKMeansForAllAreas(suppliersData, k, kMeans, mustBeInClustering)
+        clusters, mustBeInClustering = runKMeansForAllAreas(suppliersData, k_clusters, kMeans, mustBeInClustering)
         # if cycle > 1:
         #     print(clusters)
         rowsToBeRemoved = []
