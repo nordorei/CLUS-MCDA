@@ -40,7 +40,7 @@ def __initClustering(clusters):
     for area in businessAreas.values():
         mustBeInClustering[area] = True
 
-    return suppliersData, k, kMeans, mustBeInClustering
+    return suppliersData, mustBeInClustering
 
 
 def __isClusteringNeeded(mustBeInClustering):
@@ -53,7 +53,7 @@ def __isClusteringNeeded(mustBeInClustering):
     return False
 
 
-def runKMeansForAllAreas(suppliersData, k, kMeans, mustBeInClustering):
+def runKMeansForAllAreas(suppliersData, k, mustBeInClustering):
     """
     """
     clusters = {}
@@ -113,15 +113,12 @@ def runKMeansForAllAreas(suppliersData, k, kMeans, mustBeInClustering):
 def runCLUSMCDA(k_clusters=5):
     """
     """
-    suppliersData, k, kMeans, mustBeInClustering = __initClustering(k_clusters)
+    suppliersData, mustBeInClustering = __initClustering(k_clusters)
 
     cycle = 0
     while __isClusteringNeeded(mustBeInClustering):
         cycle += 1
-        print(cycle, mustBeInClustering.values(), '\n')
-        clusters, mustBeInClustering = runKMeansForAllAreas(suppliersData, k_clusters, kMeans, mustBeInClustering)
-        # if cycle > 1:
-        #     print(clusters)
+        clusters, mustBeInClustering = runKMeansForAllAreas(suppliersData, k_clusters, mustBeInClustering)
         rowsToBeRemoved = []
         for area in businessAreas.values():
             if not mustBeInClustering[area]:
@@ -256,11 +253,7 @@ def runCLUSMCDA(k_clusters=5):
 
             areaClusterDataRanks = np.array(areaClusterDataRanks)
 
-            print(area)
-            print(areaClusterDataRanks)
-
             # finding top 3 clusters/candidates
-            topClusters = [row[0] for row in areaClusterDataRanks if int(row[-1]) <= 3]
             topClusters = {}
             lowClusters = []
             for row in areaClusterDataRanks:
@@ -276,19 +269,10 @@ def runCLUSMCDA(k_clusters=5):
 
 
         rowsToBeRemoved.sort()
-        dataLength = 0
-        for area in suppliersData:
-            dataLength += len(suppliersData[area])
-        print('old length:', dataLength)
-        print('to be removed', len(rowsToBeRemoved))
         for area in suppliersData:
             for uselessRow in rowsToBeRemoved:
                 suppliersData[area].pop(uselessRow, None)
-        dataLength = 0
-        for area in suppliersData:
-            dataLength += len(suppliersData[area])
-        print('new length:', dataLength, '************************************************************\n\n')
-        input("press enter to move on: ")
+
 
 def getRanks(dataColumn, descending=False):
     """
@@ -314,7 +298,12 @@ def getFinalRanks(yRanks, zRanks, uRanks):
         data.append(row)
 
     rankTuples.sort()
-    fRanks = [rankTuples.index(row) + 1 for row in data]
+    fRanks = []
+    for row in data:
+        rank = rankTuples.index(row) + 1
+        while rank in fRanks:
+            rank += 1
+        fRanks.append(rank)
     return fRanks
 
 if __name__ == '__main__':
