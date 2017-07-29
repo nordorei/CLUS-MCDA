@@ -6,12 +6,11 @@ import numpy as np
 import math
 
 businessAreas = dataProvider.getBusinessAreasList()
-k = 5 # default number of clusters
 sample_case_study = 'Contractor'
 min_columns = [0 , 5 , 6]
 max_columns = [1, 2, 3, 4]
 suppliersData = {}
-kMeans = KMeans(n_clusters=k)
+
 
 def plotUnitsPerBusinessAreas(suppliersData):
     plot_handles = []
@@ -25,6 +24,7 @@ def plotUnitsPerBusinessAreas(suppliersData):
     #pyplot.legend(handles=plot_handles, bbox_to_anchor=(1.05, 2.5), loc=2, borderaxespad=0.)
     pyplot.show()
     return None
+
 
 def __initClustering(clusters):
     """
@@ -110,9 +110,42 @@ def runKMeansForAllAreas(suppliersData, k, mustBeInClustering):
         clusters[area] = clusterData
         # pyplot.legend(handles=plot_handles, bbox_to_anchor=(1.05, 2.5), loc=2, borderaxespad=0.)
         # pyplot.show()
-        
 
     return clusters, mustBeInClustering
+
+
+def __getRanks(dataColumn, descending=False):
+    """
+    """
+    items = [item for item in dataColumn]
+    itemsSorted = [item for item in dataColumn]
+    itemsSorted.sort(reverse=descending)
+
+    ranks = [itemsSorted.index(item) + 1 for item in items]
+
+    return ranks
+
+
+def __getFinalRanks(yRanks, zRanks, uRanks):
+    """
+    """
+    rankTuples = []
+    data = []
+    for i in range(len(yRanks)):
+        row = [yRanks[i], zRanks[i], uRanks[i]]
+        row.sort()
+        rankTuples.append(row)
+        data.append(row)
+
+    rankTuples.sort()
+    fRanks = []
+    for row in data:
+        rank = rankTuples.index(row) + 1
+        while rank in fRanks:
+            rank += 1
+        fRanks.append(rank)
+    return fRanks
+
 
 def runCLUSMCDA(k_clusters=5):
     """
@@ -231,11 +264,11 @@ def runCLUSMCDA(k_clusters=5):
             areaClusterData = np.array(areaClusterData)
 
             # determining rankings for each column
-            yRanks = getRanks(areaClusterData[:,1])
-            zRanks = getRanks(areaClusterData[:,2], descending=True)
-            uRanks = getRanks(areaClusterData[:,3])
+            yRanks = __getRanks(areaClusterData[:,1])
+            zRanks = __getRanks(areaClusterData[:,2], descending=True)
+            uRanks = __getRanks(areaClusterData[:,3])
 
-            fRanks = getFinalRanks(yRanks, zRanks, uRanks)
+            fRanks = __getFinalRanks(yRanks, zRanks, uRanks)
             # appending ranks to data rows
             ranks = np.array([[yRanks[i], zRanks[i], uRanks[i], fRanks[i]] for i in range(len(yRanks))])
             
@@ -274,38 +307,6 @@ def runCLUSMCDA(k_clusters=5):
             print(row, suppliersData[area][row])
         print('\n')
 
-
-def getRanks(dataColumn, descending=False):
-    """
-    """
-    items = [item for item in dataColumn]
-    itemsSorted = [item for item in dataColumn]
-    itemsSorted.sort(reverse=descending)
-
-    ranks = [itemsSorted.index(item) + 1 for item in items]
-
-    return ranks
-
-
-def getFinalRanks(yRanks, zRanks, uRanks):
-    """
-    """
-    rankTuples = []
-    data = []
-    for i in range(len(yRanks)):
-        row = [yRanks[i], zRanks[i], uRanks[i]]
-        row.sort()
-        rankTuples.append(row)
-        data.append(row)
-
-    rankTuples.sort()
-    fRanks = []
-    for row in data:
-        rank = rankTuples.index(row) + 1
-        while rank in fRanks:
-            rank += 1
-        fRanks.append(rank)
-    return fRanks
 
 if __name__ == '__main__':
     runCLUSMCDA()

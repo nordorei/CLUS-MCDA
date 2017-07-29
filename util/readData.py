@@ -75,6 +75,8 @@ def getSuppliersData(businessArea):
             if cellValue is None:
                 hasNullData = True
                 break
+            elif cellValue == 'c':
+                cellValue = 60
             sDataList.append(cellValue)
 
         if hasNullData:
