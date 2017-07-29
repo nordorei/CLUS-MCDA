@@ -9,32 +9,27 @@ businessAreas = dataProvider.getBusinessAreasList().values()
 sample_case_study = 'Contractor'
 min_columns = [0 , 5 , 6]
 max_columns = [1, 2, 3, 4]
-suppliersData = {}
 
 
 def plotUnitsPerBusinessAreas(suppliersData):
     plot_handles = []
     for area in suppliersData:
-        ds = [item for item in suppliersData[area].values()]
-        X = [item[0] for item in ds]
-        Y = [item[1] for item in ds]
+        X = [item[0] for item in suppliersData[area].values()]
+        Y = [item[1] for item in suppliersData[area].values()]
         plot, = pyplot.plot(X,Y,'o', label=area)
         plot_handles.append(plot)
 
-    #pyplot.legend(handles=plot_handles, bbox_to_anchor=(1.05, 2.5), loc=2, borderaxespad=0.)
+    # pyplot.legend(handles=plot_handles, bbox_to_anchor=(1.05, 2.5), loc=2, borderaxespad=0.)
     pyplot.show()
     return None
 
 
-def __initClustering(clusters):
+def __initClustering():
     """
     """
     suppliersData = {}
     for area in businessAreas:
         suppliersData[area] = dataProvider.getSuppliersData(area)
-    
-    k = clusters
-    kMeans = KMeans(n_clusters=k)
     
     mustBeInClustering = {}
     for area in businessAreas:
@@ -150,7 +145,7 @@ def __getFinalRanks(yRanks, zRanks, uRanks):
 def runCLUSMCDA(k_clusters=5):
     """
     """
-    suppliersData, mustBeInClustering = __initClustering(k_clusters)
+    suppliersData, mustBeInClustering = __initClustering()
     cycle = 0
     while __isClusteringNeeded(mustBeInClustering):
         cycle += 1
@@ -264,9 +259,9 @@ def runCLUSMCDA(k_clusters=5):
             areaClusterData = np.array(areaClusterData)
 
             # determining rankings for each column
-            yRanks = __getRanks(areaClusterData[:,1])
-            zRanks = __getRanks(areaClusterData[:,2], descending=True)
-            uRanks = __getRanks(areaClusterData[:,3])
+            yRanks = __getRanks(areaClusterData[:,1], descending=True)
+            zRanks = __getRanks(areaClusterData[:,2])
+            uRanks = __getRanks(areaClusterData[:,3], descending=True)
 
             fRanks = __getFinalRanks(yRanks, zRanks, uRanks)
             # appending ranks to data rows
@@ -280,6 +275,10 @@ def runCLUSMCDA(k_clusters=5):
 
             areaClusterDataRanks = np.array(areaClusterDataRanks)
 
+            if area == sample_case_study:
+                print('\nCycle', cycle, '\n')
+                print('data in', area, ':', len(suppliersData[area]))
+                print(areaClusterDataRanks)
             # finding top 3 clusters/candidates
             topClusters = {}
             lowClusters = []
