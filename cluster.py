@@ -5,7 +5,7 @@ import util.readData as dataProvider
 import numpy as np
 import math
 
-businessAreas = dataProvider.getBusinessAreasList()
+businessAreas = dataProvider.getBusinessAreasList().values()
 sample_case_study = 'Contractor'
 min_columns = [0 , 5 , 6]
 max_columns = [1, 2, 3, 4]
@@ -30,14 +30,14 @@ def __initClustering(clusters):
     """
     """
     suppliersData = {}
-    for area in businessAreas.values():
+    for area in businessAreas:
         suppliersData[area] = dataProvider.getSuppliersData(area)
     
     k = clusters
     kMeans = KMeans(n_clusters=k)
     
     mustBeInClustering = {}
-    for area in businessAreas.values():
+    for area in businessAreas:
         mustBeInClustering[area] = True
 
     return suppliersData, mustBeInClustering
@@ -46,7 +46,7 @@ def __initClustering(clusters):
 def __isClusteringNeeded(mustBeInClustering):
     """
     """
-    for area in businessAreas.values():
+    for area in businessAreas:
         if mustBeInClustering[area]:
             return True
 
@@ -57,7 +57,7 @@ def runKMeansForAllAreas(suppliersData, k, mustBeInClustering):
     """
     """
     clusters = {}
-    for area in businessAreas.values():
+    for area in businessAreas:
 
         data = []
         for item in suppliersData[area]:
@@ -156,7 +156,7 @@ def runCLUSMCDA(k_clusters=5):
         cycle += 1
         clusters, mustBeInClustering = runKMeansForAllAreas(suppliersData, k_clusters, mustBeInClustering)
         rowsToBeRemoved = []
-        for area in businessAreas.values():
+        for area in businessAreas:
             areaClusterData = []            
             for cluster in clusters[area]:
                 areaClusterRows = clusters[area][cluster][:,0]
@@ -301,7 +301,7 @@ def runCLUSMCDA(k_clusters=5):
                 suppliersData[area].pop(uselessRow, None)
 
     # printing the final results
-    for area in businessAreas.values():
+    for area in businessAreas:
         print(area)
         for row in suppliersData[area]:
             print(row, suppliersData[area][row])
