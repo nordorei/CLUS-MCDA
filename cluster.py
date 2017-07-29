@@ -58,8 +58,6 @@ def runKMeansForAllAreas(suppliersData, k, mustBeInClustering):
     """
     clusters = {}
     for area in businessAreas.values():
-        if mustBeInClustering[area] == False:
-            continue # ready for ranking
 
         data = []
         for item in suppliersData[area]:
@@ -68,8 +66,14 @@ def runKMeansForAllAreas(suppliersData, k, mustBeInClustering):
 
         if len(data) <= 5: # no clustering needed
             mustBeInClustering[area] = False
-            clusters[area] = {'FinalCandidates': np.array(data)}
-            continue
+            clusterData = {}
+            for i in range(len(data)):
+                clusterLabel = 'Candidate{}'.format(i + 1)
+                clusterData[clusterLabel] = np.array([data[i]])
+            clusters[area] = clusterData
+
+        if mustBeInClustering[area] == False:
+            continue # ready for ranking
 
         data = np.array(data)
         kMeans = KMeans(n_clusters=k)
@@ -114,17 +118,13 @@ def runCLUSMCDA(k_clusters=5):
     """
     """
     suppliersData, mustBeInClustering = __initClustering(k_clusters)
-
     cycle = 0
     while __isClusteringNeeded(mustBeInClustering):
         cycle += 1
         clusters, mustBeInClustering = runKMeansForAllAreas(suppliersData, k_clusters, mustBeInClustering)
         rowsToBeRemoved = []
         for area in businessAreas.values():
-            if not mustBeInClustering[area]:
-                continue
-
-            areaClusterData = []
+            areaClusterData = []            
             for cluster in clusters[area]:
                 areaClusterRows = clusters[area][cluster][:,0]
 
@@ -272,6 +272,13 @@ def runCLUSMCDA(k_clusters=5):
         for area in suppliersData:
             for uselessRow in rowsToBeRemoved:
                 suppliersData[area].pop(uselessRow, None)
+
+    # printing the final results
+    for area in businessAreas.values():
+        print(area)
+        for row in suppliersData[area]:
+            print(row, suppliersData[area][row])
+        print('\n')
 
 
 def getRanks(dataColumn, descending=False):
