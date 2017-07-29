@@ -256,6 +256,9 @@ def runCLUSMCDA(k_clusters=5):
 
             areaClusterDataRanks = np.array(areaClusterDataRanks)
 
+            print(area)
+            print(areaClusterDataRanks)
+
             # finding top 3 clusters/candidates
             topClusters = [row[0] for row in areaClusterDataRanks if int(row[-1]) <= 3]
             topClusters = {}
@@ -271,6 +274,7 @@ def runCLUSMCDA(k_clusters=5):
             for cluster in lowClusters:
                 rowsToBeRemoved.extend(clusters[area][cluster][:,0].astype(int).tolist())
 
+
         rowsToBeRemoved.sort()
         dataLength = 0
         for area in suppliersData:
@@ -283,7 +287,8 @@ def runCLUSMCDA(k_clusters=5):
         dataLength = 0
         for area in suppliersData:
             dataLength += len(suppliersData[area])
-        print('new length:', dataLength, '\n\n')
+        print('new length:', dataLength, '************************************************************\n\n')
+        input("press enter to move on: ")
 
 def getRanks(dataColumn, descending=False):
     """
