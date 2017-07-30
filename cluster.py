@@ -26,6 +26,16 @@ def plotUnitsPerBusinessAreas(suppliersData):
 
 def __initClustering():
     """
+    (None) -> {Dict}, {Dict}
+
+    Initializes the two key dictionaries for the clustering.
+
+    @returns
+    suppliersData: a StringToDict dictionary. Receives a string as a key, representing the business area,
+      gives a IntegerToList dictionary.
+    mustBeInClustering: a StringToBoolean dictionary. Receives a string as a key, representing the business
+      area, gives a boolean to determine if it must be in clustering cycle or not.
+
     """
     suppliersData = {}
     for area in businessAreas:
@@ -40,6 +50,10 @@ def __initClustering():
 
 def __isClusteringNeeded(mustBeInClustering):
     """
+    ({Dict}) -> Boolean
+
+    Checks if any business area must be in the clustering cycle or not.
+
     """
     for area in businessAreas:
         if mustBeInClustering[area]:
@@ -50,6 +64,16 @@ def __isClusteringNeeded(mustBeInClustering):
 
 def runKMeansForAllAreas(suppliersData, k, mustBeInClustering):
     """
+    ({Dict}, int, {Dict}) -> {Dict}, {Dict}
+
+    Runs KMeans clustering method for all business areas and gives the clusters for each area in a dictionary.
+
+    @returns
+    clusters: a StringToDict dictionary. Receives a string as a key, representing the business area, gives a
+      StringToList dictionary. 
+    mustBeInClustering: a StringToBoolean dictionary. Receives a string as a key, representing the business
+      area, gives a boolean to determine if it must be in clustering cycle or not.
+
     """
     clusters = {}
     for area in businessAreas:
@@ -110,6 +134,11 @@ def runKMeansForAllAreas(suppliersData, k, mustBeInClustering):
 
 def __getRanks(dataColumn, descending=False):
     """
+    ([List], Boolean) -> [List]
+
+    Determines the indexes(ranks) of data stored in the given list after getting sorted. Has an option to
+      make it a descending ranking.
+
     """
     items = [item for item in dataColumn]
     itemsSorted = sorted(items, reverse=descending)
@@ -120,6 +149,10 @@ def __getRanks(dataColumn, descending=False):
 
 def __getFinalRanks(yRanks, zRanks, uRanks):
     """
+    ([List], [List], [List]) -> [List]
+
+    Determines the final ranking of data rows by getting average of Y,Z and U rankings.
+
     """
     rankAverages = [(yRanks[i] + zRanks[i] + uRanks[i]) / 3 for i in range(len(yRanks))]
     sortedAverages = sorted(rankAverages)
@@ -136,6 +169,7 @@ def __getFinalRanks(yRanks, zRanks, uRanks):
 
 def runCLUSMCDA(k_clusters=5):
     """
+    (int) -> None
     """
     suppliersData, mustBeInClustering = __initClustering()
     cycle = 0
