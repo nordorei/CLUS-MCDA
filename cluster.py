@@ -53,7 +53,6 @@ def runKMeansForAllAreas(suppliersData, k, mustBeInClustering):
     """
     clusters = {}
     for area in businessAreas:
-
         data = []
         for item in suppliersData[area]:
             costPerPrice = suppliersData[area][item][0]
@@ -113,32 +112,25 @@ def __getRanks(dataColumn, descending=False):
     """
     """
     items = [item for item in dataColumn]
-    itemsSorted = [item for item in dataColumn]
-    itemsSorted.sort(reverse=descending)
+    itemsSorted = sorted(items, reverse=descending)
 
     ranks = [itemsSorted.index(item) + 1 for item in items]
-
     return ranks
 
 
 def __getFinalRanks(yRanks, zRanks, uRanks):
     """
     """
-    rankTuples = []
-    data = []
-    for i in range(len(yRanks)):
-        row = [yRanks[i], zRanks[i], uRanks[i]]
-        row.sort()
-        rankTuples.append(row)
-        data.append(row)
+    rankAverages = [(yRanks[i] + zRanks[i] + uRanks[i]) / 3 for i in range(len(yRanks))]
+    sortedAverages = sorted(rankAverages)
 
-    rankTuples.sort()
     fRanks = []
-    for row in data:
-        rank = rankTuples.index(row) + 1
+    for item in rankAverages:
+        rank = sortedAverages.index(item) + 1
         while rank in fRanks:
             rank += 1
         fRanks.append(rank)
+
     return fRanks
 
 
@@ -279,14 +271,12 @@ def runCLUSMCDA(k_clusters=5):
                 print('\nCycle', cycle, '\n')
                 print('data in', area, ':', len(suppliersData[area]))
                 print(areaClusterDataRanks)
+
             # finding top 3 clusters/candidates
-            topClusters = {}
             lowClusters = []
             for row in areaClusterDataRanks:
                 rank = int(row[-1])
-                if rank <= 3:
-                    topClusters[rank] = row[0]
-                else:
+                if rank > 3:
                     lowClusters.append(row[0])
 
             # removing low clusters from data set
@@ -300,11 +290,11 @@ def runCLUSMCDA(k_clusters=5):
                 suppliersData[area].pop(uselessRow, None)
 
     # printing the final results
-    for area in businessAreas:
-        print(area)
-        for row in suppliersData[area]:
-            print(row, suppliersData[area][row])
-        print('\n')
+    # for area in businessAreas:
+    #     print(area)
+    #     for row in suppliersData[area]:
+    #         print(row, suppliersData[area][row])
+    #     print('\n')
 
 
 if __name__ == '__main__':
