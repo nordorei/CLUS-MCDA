@@ -173,10 +173,12 @@ def runCLUSMCDA(k_clusters=5):
     """
     suppliersData, mustBeInClustering = __initClustering()
     cycle = 0
+    topClusters = {}
     while __isClusteringNeeded(mustBeInClustering):
         cycle += 1
         clusters, mustBeInClustering = runKMeansForAllAreas(suppliersData, k_clusters, mustBeInClustering)
         rowsToBeRemoved = []
+        topClusters = {}
         for area in businessAreas:
             areaClusterData = []            
             for cluster in clusters[area]:
@@ -280,14 +282,14 @@ def runCLUSMCDA(k_clusters=5):
                 z /= no
                 u /= no
 
-                areaClusterData.append(np.array([cluster, float(y), float(z), float(u)]))
+                areaClusterData.append(np.array([cluster, sum(areaClusterRows), float(y), float(z), float(u)]))
 
             areaClusterData = np.array(areaClusterData)
 
             # determining rankings for each column
-            yRanks = __getRanks(areaClusterData[:,1], descending=True)
-            zRanks = __getRanks(areaClusterData[:,2])
-            uRanks = __getRanks(areaClusterData[:,3], descending=True)
+            yRanks = __getRanks(areaClusterData[:,2], descending=True)
+            zRanks = __getRanks(areaClusterData[:,3])
+            uRanks = __getRanks(areaClusterData[:,4], descending=True)
 
             fRanks = __getFinalRanks(yRanks, zRanks, uRanks)
             # appending ranks to data rows
@@ -301,17 +303,24 @@ def runCLUSMCDA(k_clusters=5):
 
             areaClusterDataRanks = np.array(areaClusterDataRanks)
 
-            if area == sample_case_study:
-                print('\nCycle', cycle, '\n')
-                print('data in', area, ':', len(suppliersData[area]))
-                print(areaClusterDataRanks)
+            # if area == sample_case_study:
+            #     print('\nCycle', cycle, '\n')
+            #     print('data in', area, ':', len(suppliersData[area]))
+            #     print(areaClusterDataRanks)
 
             # finding top 3 clusters/candidates
             lowClusters = []
             for row in areaClusterDataRanks:
                 rank = int(row[-1])
+                cluster = row[0]
                 if rank > 3:
-                    lowClusters.append(row[0])
+                    lowClusters.append(cluster)
+                else:
+                    if 'Candidate' in cluster:
+                        if area in topClusters:
+                            topClusters[area][rank] = row[1]
+                        else:
+                            topClusters[area] = {rank: row[1]}
 
             # removing low clusters from data set
             for cluster in lowClusters:
@@ -324,11 +333,11 @@ def runCLUSMCDA(k_clusters=5):
                 suppliersData[area].pop(uselessRow, None)
 
     # printing the final results
-    # for area in businessAreas:
-    #     print(area)
-    #     for row in suppliersData[area]:
-    #         print(row, suppliersData[area][row])
-    #     print('\n')
+    for area in businessAreas:
+        print(area)
+        for rank in topClusters[area]:
+            print('Rank {}: '.format(rank), topClusters[area][rank])
+        print('\n')
 
 
 if __name__ == '__main__':
