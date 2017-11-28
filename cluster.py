@@ -1,3 +1,11 @@
+'''
+This project is part of the CLUS-MCDA approach.
+
+Corresponding author: Abteen Ijadi Maghsoodi
+Algorithm Designer: Abteen Ijadi Maghsoodi
+Software Developer: Azad Kavian
+'''
+
 from sklearn.cluster import KMeans
 from matplotlib import pyplot
 from scipy.spatial import ConvexHull
@@ -12,6 +20,12 @@ max_columns = [1, 2, 3, 4]
 
 
 def plotUnitsPerBusinessAreas(suppliersData):
+    """
+    ({Dict}) -> None
+
+    Draws plots according to the suppliers data
+
+    """
     plot_handles = []
     for area in suppliersData:
         X = [item[0] for item in suppliersData[area].values()]
@@ -167,25 +181,35 @@ def __getFinalRanks(yRanks, zRanks, uRanks):
     return fRanks
 
 
+# This is where the magic happens ...
 def runCLUSMCDA(k_clusters=5):
     """
     (int) -> None
+
+    Runs the CLUS-MCDA algorithm on the given number of clusters.
+    The default number is 5.
+
     """
+    # Initializing the data ...
     suppliersData, mustBeInClustering = __initClustering()
     cycle = 0
     topClusters = {}
+
+    # Running a loop until every cluster is done ...
     while __isClusteringNeeded(mustBeInClustering):
         cycle += 1
+        # Running KMeans algorithim to get clusters ...
         clusters, mustBeInClustering = runKMeansForAllAreas(suppliersData, k_clusters, mustBeInClustering)
         rowsToBeRemoved = []
         topClusters = {}
+        # Investigating each business area ...
         for area in businessAreas:
             areaClusterData = []            
             for cluster in clusters[area]:
                 areaClusterRows = clusters[area][cluster][:,0]
 
-                x = np.array([dataProvider.getRow(row) for row in areaClusterRows])
-                w = [0.207317073, 0.12195122, 0.170731707, 0.12195122, 0.097560976, 0.146341463, 0.134146341]
+                x = np.array([dataProvider.getRow(row) for row in areaClusterRows]) # Reading data from .xls sheet
+                w = [0.207317073, 0.12195122, 0.170731707, 0.12195122, 0.097560976, 0.146341463, 0.134146341] # weights determined by the author
                 n = len(w) # number of columns
 
                 # normalizing X
