@@ -1,4 +1,7 @@
 # CLUS-MCDA
+
+##### A NEW UPDATE IS ON THE WAY! Please see: https://github.com/Aimaghsoodi/CLUS-MCDA-II
+
 ##### Corresponding author: Abteen Ijadi Maghsoodi
 ##### Algorithm Designer: Abteen Ijadi Maghsoodi
 aimaghsoodi@srbiau.ac.ir - aimaghsoodi@outlook.com
